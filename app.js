@@ -1,30 +1,29 @@
+//Dependencies
 const express = require('express');
 const mysql = require('mysql');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-
+const helmet = require("helmet");
+//DEFINE PORT
 const PORT = process.env.PORT || 3001;
-
+//INSTANTIATE SERVER
 const app = express();
-
+//MIDDLEWARES
 app.use(bodyParser.json());
 app.use(cors());
-
-
-
+app.use(helmet());
+//CREATE CONNECTION
 const connection = mysql.createConnection({
 	host: '64.225.47.18',
   user: 'mellitus',
   password: 'itecriocuarto2020',
   database: 'SindicatoCarneDB'
 })
-
+//DB CONNECTION
 connection.connect(error => {
 	if (error) throw error;
 	console.log('Database connected')
 })
-
-
 
 app.listen(PORT, () => {
 	console.log('Server running on port 3001')
@@ -71,7 +70,7 @@ app.post('/add', (req, res) => {
 		estadocivil: req.body.estadocivil,
 		empresaPostulante: req.body.empresaPostulante,
 		activoPostulante: req.body.activoPostulante,
-		telPostulante: req.body.activoPostulante,
+		telPostulante: req.body.telPostulante,
 		emailPostulante: req.body.emailPostulante,
 		fcargaPostulante: req.body.fcargaPostulante
 	}
@@ -81,7 +80,8 @@ app.post('/add', (req, res) => {
 		if (err) throw err;
 		res.send({
 			message: 'Postulante agregado',
-			success: true
+			success: true,
+			payload: postulanteObj
 		})
 		
 	})
