@@ -129,14 +129,11 @@ app.post('/add', (req, res) => {
 		return new Promise((resolve, reject) => {
 			connection.query(`SELECT * FROM postulante WHERE dniPostulante = ${req.body.dniPostulante}`, (err, results) => {	
 				if (err) throw err;
-				let duplicate;
 				if (results.length > 0) {
-					duplicate = true
-					resolve(duplicate)
+					resolve(true)
 
 				} else{
-					duplicate = false
-					resolve(duplicate)
+					resolve(false)
 				}
 			})
 
@@ -183,7 +180,7 @@ app.delete('/delete/:id', (req, res) => {
 	})
 })
 
-/*app.delete('/delete', (req, res) => {
+app.delete('/delete', (req, res) => {
 	const sql = `DELETE FROM postulante`
 	connection.query(sql, (err) => {
 		if (err) throw err;
@@ -192,4 +189,4 @@ app.delete('/delete/:id', (req, res) => {
 			success: true
 		})
 	})
-})*/
+})
