@@ -3,14 +3,14 @@ const express = require("express");
 const Joi = require('joi');
 const mysql = require('mysql');
 
-//CREATE CONNECTION
+// Create connection
 const connection = mysql.createConnection({
 	host: '64.225.47.18',
   user: 'mellitus',
   password: 'itecriocuarto2020',
   database: 'SindicatoCarneDB'
 })
-//DB CONNECTION
+// Connect to DB
 connection.connect(error => {
 	if (error) throw error;
 	console.log('Database connected')

@@ -5,7 +5,7 @@ const Joi = require('joi');
 // Setup the express server router
 const router = express.Router();
 
-//DEFINE EMAIL API
+// Set up email transporter
 const transporter = nodemailer.createTransport({
 	host: 'smtp.gmail.com',
 	port: 465,
@@ -15,11 +15,13 @@ const transporter = nodemailer.createTransport({
 		pass:'mozqdjeijvgaqevv'
 	}
 })
-transporter.verify().then(() => {
+
+transporter.verify()
+.then(() => {
 	console.log('Ready to send email')
 })
 
-//SEND NOTIFICATION MAIL 
+// Send notification email
 router.post('/', (req, res) => {
 	const { error } = validateEmail(req.body);
 	if (error){
@@ -68,6 +70,7 @@ router.post('/', (req, res) => {
 		}
 		})
 })
+
 const validateEmail = (email) => {
 	const schema = Joi.object({
 		nombrePostulante: Joi.string().min(3).max(250).required(),

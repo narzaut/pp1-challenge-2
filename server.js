@@ -1,4 +1,4 @@
-//Dependencies
+// Dependencies
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -6,11 +6,11 @@ const helmet = require('helmet');
 const authRouter = require("./routes/auth");
 const postulantesRouter = require("./routes/postulantes");
 const sendEmailRouter = require("./routes/send-email");
-//DEFINE PORT
+// Define port
 const PORT = process.env.PORT || 3001;
-//INSTANTIATE SERVER
+// Instantiate server
 const app = express();
-//MIDDLEWARES
+// Middlewares
 app.use(express.json());
 app.use(cors());
 app.use(helmet());
