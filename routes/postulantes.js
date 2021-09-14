@@ -99,6 +99,7 @@ router.post('/', [auth, poster], (req, res) => {
 					success: false,
 					payload: postulante.value
 				})
+				console.log('El postulante ya existe en la base de datos')
 			}
 		} catch {
 			console.log('ERRROR	')
@@ -107,26 +108,6 @@ router.post('/', [auth, poster], (req, res) => {
 	}
 	addToDb()
 })
-
-/*app.delete('/:id', (req, res) => {
-	const schema = Joi.number().integer().min(0).required();
-	const validateId = schema.validate(req.params.id)
-	if (validateId.error) {
-		res.status(400).send(validateId.error.details[0].message)
-		return;
-	}
-	const sql = `DELETE FROM postulante WHERE idPostulante = ${validateId.value}`
-	connection.query(sql, (err, results) => {
-		if (err) throw err;
-		if (results.affectedRows == 0){
-			res.status(404).send('El postulante ingresado no existe en la base de datos.');
-			return;
-		}
-		res.status(200).send('El postulante ha sido agregado a la base de datos.');
-	})
-})
-*/
-
 
 const validatePostulante = (postulante) => {
 	const schema = Joi.object({
@@ -146,3 +127,35 @@ const validatePostulante = (postulante) => {
 
 // Export the router
 module.exports = router;
+
+/*
+router.delete('/:id', [auth, editor], (req, res) => {
+	const schema = Joi.number().integer().min(0).required();
+	const validateId = schema.validate(req.params.id)
+	if (validateId.error) {
+		res.status(400).send(validateId.error.details[0].message)
+		return;
+	}
+	const sql = `DELETE FROM postulante WHERE idPostulante = ${validateId.value}`
+	connection.query(sql, (err, results) => {
+		if (err) throw err;
+		if (results.affectedRows == 0){
+			res.status(404).send('El postulante ingresado no existe en la base de datos.');
+			return;
+		}
+		res.status(200).send('El postulante ha sido agregado a la base de datos.');
+	})
+})
+
+router.delete('/', [auth, editor], (req, res) => {
+	const sql = `DELETE FROM postulante`
+	connection.query(sql, (err, results) => {
+		if (err) throw err;
+		if (results.affectedRows == 0){
+			res.status(404).send('No hay postulantes para borrar.');
+			return;
+		}
+		res.status(200).send('Se han eliminado todos los postulantes.');
+	})
+})
+*/
