@@ -1,5 +1,6 @@
 const express = require('express');
 const nodemailer = require('nodemailer');
+const Joi = require('joi');
 
 // Setup the express server router
 const router = express.Router();
@@ -59,10 +60,25 @@ router.post('/', (req, res) => {
 
 		}else {
 			console.log('Email enviado exitosamente')
-			res.status(200).send(req.body);
+			res.status(200).send({
+				message:'Email enviado.',
+				status:200,
+				payload: req.body
+			});
 		}
 		})
 })
+const validateEmail = (email) => {
+	const schema = Joi.object({
+		nombrePostulante: Joi.string().min(3).max(250).required(),
+		dniPostulante: Joi.string().min(7).max(11).required(),
+		telPostulante: Joi.string().min(7).max(100).required(),
+		emailPostulante: Joi.string().max(100).required(),
+		empresaPostulante: Joi.string().max(250).required()
+	});
+
+	return schema.validate(email);
+}
 
 // Export the router
 module.exports = router;

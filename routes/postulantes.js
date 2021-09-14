@@ -86,6 +86,7 @@ router.post('/', [auth, poster], (req, res) => {
 					if (err) throw err;
 					res.status(200).send({
 						message: 'Postulante agregado',
+						status:200,
 						success: true,
 						payload: postulante.value
 					})	
@@ -94,6 +95,7 @@ router.post('/', [auth, poster], (req, res) => {
 			} else{
 				res.status(400).send({
 					message: 'El postulante ya existe en la base de datos',
+					status:400,
 					success: false,
 					payload: postulante.value
 				})
@@ -124,17 +126,7 @@ router.post('/', [auth, poster], (req, res) => {
 	})
 })
 */
-const validateEmail = (email) => {
-	const schema = Joi.object({
-		nombrePostulante: Joi.string().min(3).max(250).required(),
-		dniPostulante: Joi.string().min(7).max(11).required(),
-		telPostulante: Joi.string().min(7).max(100).required(),
-		emailPostulante: Joi.string().max(100).required(),
-		empresaPostulante: Joi.string().max(250).required()
-	});
 
-	return schema.validate(email);
-}
 
 const validatePostulante = (postulante) => {
 	const schema = Joi.object({
