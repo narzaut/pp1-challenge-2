@@ -3,13 +3,13 @@ const express = require('express');
 const mysql = require('mysql');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
-const bodyParser = require('body-parser');
-const helmet = require("helmet");
+const helmet = require('helmet');
+const Joi = require('joi');
 //DEFINE PORT
 const PORT = process.env.PORT || 3001;
 //DEFINE EMAIL API
 const transporter = nodemailer.createTransport({
-	host: "smtp.gmail.com",
+	host: 'smtp.gmail.com',
 	port: 465,
 	secure: true,	
 	auth: {
@@ -23,7 +23,7 @@ transporter.verify().then(() => {
 //INSTANTIATE SERVER
 const app = express();
 //MIDDLEWARES
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(cors());
 app.use(helmet());
 //CREATE CONNECTION
@@ -42,24 +42,30 @@ connection.connect(error => {
 app.listen(PORT, () => {
 	console.log('Server running on port 3001')
 })
+
 //SEND NOTIFICATION MAIL 
 app.post('/send-email', (req, res) => {
+	const { error } = validateEmail(req.body);
+	if (error){
+		res.status(400).send(error.details[0].message);
+		return;
+	}
 	transporter.sendMail({
-		from: '"Nuevo postulante" <notificacionsindicarne@gmail.com>',
+		from: "'Nuevo postulante' <notificacionsindicarne@gmail.com>",
 		to: 'i.arzaut@itecriocuarto.org.ar',
 		subject: 'Sindicarne Río Cuarto',
 		html: `
 			<!DOCTYPE HTML>
-			<html style="margin: 0; padding: 0; ">
+			<html style='margin: 0; padding: 0; '>
 				<head>
-					<meta charset="utf-8" />
-					<meta name="viewport" content="width=device-width, initial-scale=1" />
+					<meta charset='utf-8' />
+					<meta name='viewport' content='width=device-width, initial-scale=1' />
 				
 				</head>
-				<body style="margin: 0; padding: 0; ">
-					<div style=" ">
-						<div style="">
-							<h2 ">Datos del postulante</h2>
+				<body style='margin: 0; padding: 0; '>
+					<div style=' '>
+						<div style=''>
+							<h2 '>Datos del postulante</h2>
 							<div>
 								<h3>Nombre: ${req.body.nombrePostulante}</h3>
 								<h3>DNI: ${req.body.dniPostulante}</h3>
@@ -78,12 +84,12 @@ app.post('/send-email', (req, res) => {
 
 		}else {
 			console.log('Email enviado exitosamente')
-			res.status(200).jsonp(req.body);
+			res.status(200).send(req.body);
 		}
 		})
 })
 
-app.get('/postulantes', (req, res) => {
+app.get('/api/postulantes', (req, res) => {
 	const sql = 'SELECT * from postulante';
 
 	connection.query(sql, (err, results) => {
@@ -91,40 +97,38 @@ app.get('/postulantes', (req, res) => {
 		if (results.length > 0){
 			res.json(results);
 		}else {
-			res.send('No results')
+			res.status(404).send('No hay postulantes en la base de datos.')
 		}
 	})
 })
 
-app.get('/postulantes/:id', (req, res) => {
-	const { id } = req.params;
-	const sql = `SELECT * FROM postulante WHERE idPostulante = ${id}`;
+app.get('/api/postulantes/:id', (req, res) => {
+	const schema = Joi.number().integer().min(0).required();
+	const validateId = schema.validate(req.params.id)
+	if (validateId.error) {
+		res.status(400).send(validateId.error.details[0].message)
+		return;
+	}
+	const sql = `SELECT * FROM postulante WHERE idPostulante = ${validateId.value}`;
 	connection.query(sql, (err, results) => {
 		if (err) throw err;
 		if (results.length > 0){
 			res.json(results);
 		}else {
-			res.send('No results')
+			res.status(404).send('El postulante no esta cargado en la base de datos.')
 		}
 	})
 })
 
-app.post('/add', (req, res) => {
+app.post('/api/postulantes', (req, res) => {
 	const sql = 'INSERT INTO postulante SET ?';
-	const postulanteObj = {
-		nombrePostulante: req.body.nombrePostulante,
-		dniPostulante: req.body.dniPostulante,
-		fingresoPostulante: req.body.fingresoPostulante,
-		fnacimientoPostulante: req.body.fnacimientoPostulante,
-		estadocivil: req.body.estadocivil,
-		empresaPostulante: req.body.empresaPostulante,
-		activoPostulante: req.body.activoPostulante,
-		telPostulante: req.body.telPostulante,
-		emailPostulante: req.body.emailPostulante,
-		fcargaPostulante: req.body.fcargaPostulante
+	
+	const postulante = validatePostulante(req.body)
+	if (postulante.error){
+		res.status(400).send(postulante.error.details[0].message);
+		return;
 	}
-	
-	
+
 	const isDuplicate = () => {
 		return new Promise((resolve, reject) => {
 			connection.query(`SELECT * FROM postulante WHERE dniPostulante = ${req.body.dniPostulante}`, (err, results) => {	
@@ -139,22 +143,26 @@ app.post('/add', (req, res) => {
 
 		})
 	}
+
 	async function addToDb () {
 		try {
-			const datos = await isDuplicate();
-			if (datos == false){
-				connection.query(sql, postulanteObj, err => {
+			const duplicate = await isDuplicate();
+			if (duplicate == false){
+				connection.query(sql, postulante.value, err => {
 					if (err) throw err;
-					res.send({
+					res.status(200).send({
 						message: 'Postulante agregado',
 						success: true,
-						payload: postulanteObj
+						payload: postulante.value
 					})	
 					console.log('added to db')
-		
 				})
 			} else{
-				console.log('el usuario ya existe')
+				res.status(400).send({
+					message: 'El postulante ya existe en la base de datos',
+					success: false,
+					payload: postulante.value
+				})
 			}
 		} catch {
 			console.log('ERRROR	')
@@ -162,25 +170,56 @@ app.post('/add', (req, res) => {
 		
 	}
 	addToDb()
-		
-	
-
 })
 
-app.delete('/delete/:id', (req, res) => {
-	const { id } = req.params;
-	const sql = `DELETE FROM postulante WHERE idPostulante = ${id}`
-	connection.query(sql, (err) => {
-		
+app.delete('/api/postulantes/:id', (req, res) => {
+	const schema = Joi.number().integer().min(0).required();
+	const validateId = schema.validate(req.params.id)
+	if (validateId.error) {
+		res.status(400).send(validateId.error.details[0].message)
+		return;
+	}
+	const sql = `DELETE FROM postulante WHERE idPostulante = ${validateId.value}`
+	connection.query(sql, (err, results) => {
 		if (err) throw err;
-		res.send({
-			message: 'Postulante eliminado',
-			success: true
-		})
+		if (results.affectedRows == 0){
+			res.status(404).send('El postulante ingresado no existe en la base de datos.');
+			return;
+		}
+		res.status(200).send('El postulante ha sido agregado a la base de datos.');
 	})
 })
 
-app.delete('/delete', (req, res) => {
+const validateEmail = (email) => {
+	const schema = Joi.object({
+		nombrePostulante: Joi.string().min(3).max(250).required(),
+		dniPostulante: Joi.string().min(7).max(11).required(),
+		telPostulante: Joi.string().min(7).max(100).required(),
+		emailPostulante: Joi.string().max(100).required(),
+		empresaPostulante: Joi.string().max(250).required()
+	});
+
+	return schema.validate(email);
+}
+
+const validatePostulante = (postulante) => {
+	const schema = Joi.object({
+		nombrePostulante: Joi.string().min(3).max(250).required(),
+		dniPostulante: Joi.string().min(7).max(8).required(),
+		fingresoPostulante: Joi.date().required(),
+		fnacimientoPostulante: Joi.date().required(),
+		estadocivil: Joi.number().integer().min(0).max(1).required(),
+		empresaPostulante: Joi.string().max(250).required(),
+		activoPostulante: Joi.number().integer().min(0).max(1).required(),
+		telPostulante: Joi.string().min(7).max(100).required(),
+		emailPostulante: Joi.string().max(100).required(),
+	});
+	return schema.validate(postulante);
+
+}
+
+/* DELETE
+app.delete('/postulantes', (req, res) => {
 	const sql = `DELETE FROM postulante`
 	connection.query(sql, (err) => {
 		if (err) throw err;
@@ -190,3 +229,9 @@ app.delete('/delete', (req, res) => {
 		})
 	})
 })
+*/
+
+
+/*
+Deberia mantener el endpoint de send-email junto con su servicio en el mismo archivo?
+*/
