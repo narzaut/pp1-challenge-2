@@ -11,8 +11,8 @@ const PORT = process.env.PORT || 3001;
 // Instantiate server
 const app = express();
 // Middlewares
-var distDir = __dirname + "/dist/";
-app.use(express.static(distDir));
+/*var distDir = __dirname + "/dist/";
+app.use(express.static(distDir));*/
 app.use(express.json());
 app.use(cors());
 app.use(helmet());
