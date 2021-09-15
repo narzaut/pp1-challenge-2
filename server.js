@@ -21,6 +21,10 @@ app.use("/api/auth", authRouter);
 app.use("/api/postulantes", postulantesRouter);
 app.use("/api/send-email", sendEmailRouter)
 
+app.get("/", (req,res) => {
+	res.send('hola')
+})
+
 app.listen(PORT, () => {
 	console.log(`Server running on port ${PORT}`)
 })
