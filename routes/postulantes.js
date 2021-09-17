@@ -109,6 +109,8 @@ router.post('/', [auth, poster], (req, res) => {
 	addToDb()
 })
 
+
+
 const validatePostulante = (postulante) => {
 	const schema = Joi.object({
 		nombrePostulante: Joi.string().min(3).max(250).required(),
@@ -124,6 +126,8 @@ const validatePostulante = (postulante) => {
 	return schema.validate(postulante);
 
 }
+
+
 
 // Export the router
 module.exports = router;
@@ -147,7 +151,9 @@ router.delete('/:id', [auth, editor], (req, res) => {
 	})
 })
 
-router.delete('/', [auth, editor], (req, res) => {
+
+*/
+/*router.delete('/', [auth, editor], (req, res) => {
 	const sql = `DELETE FROM postulante`
 	connection.query(sql, (err, results) => {
 		if (err) throw err;
@@ -157,5 +163,4 @@ router.delete('/', [auth, editor], (req, res) => {
 		}
 		res.status(200).send('Se han eliminado todos los postulantes.');
 	})
-})
-*/
+})*/
