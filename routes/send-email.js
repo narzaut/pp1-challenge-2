@@ -5,7 +5,7 @@ const Joi = require('joi');
 // Setup the express server router
 const router = express.Router();
 // Global var
-const receiver = "comunicacionsindelacarneriv@gmail.com"
+const receiver = "i.arzaut@itecriocuarto.org.ar"
 // Set up email transporter
 const transporter = nodemailer.createTransport({
 	host: 'smtp.gmail.com',
