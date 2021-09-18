@@ -4,7 +4,8 @@ const Joi = require('joi');
 
 // Setup the express server router
 const router = express.Router();
-
+// Global var
+const receiver = "comunicacionsindelacarneriv@gmail.com"
 // Set up email transporter
 const transporter = nodemailer.createTransport({
 	host: 'smtp.gmail.com',
@@ -30,7 +31,7 @@ router.post('/', (req, res) => {
 	}
 	transporter.sendMail({
 		from: "'Nuevo postulante' <notificacionsindicarne@gmail.com>",
-		to: 'i.arzaut@itecriocuarto.org.ar',
+		to: receiver,
 		subject: 'Sindicarne Río Cuarto',
 		html: `
 			<!DOCTYPE HTML>
