@@ -25,12 +25,12 @@ const validateTask = (task) => {
 	return schema.validate(task);
 
 }
-// Requests
+// Get all tasks
 router.get('/', [auth, viewer], (req, res) => {
 	if (database.length < 1) res.status(404).send('No existen tasks en la base de datos')
 	res.status(200).send(database)
 })
-
+// Get task by id
 router.get('/:id', [auth, viewer], async (req, res) => {
 	const schema = Joi.number().integer().min(0).required();
 	const validateId = schema.validate(req.params.id)
@@ -48,7 +48,7 @@ router.get('/:id', [auth, viewer], async (req, res) => {
 	// Send task
 	res.status(200).send(database[found])	
 })
-
+// Post task to db
 router.post('/', [auth, poster], (req, res) => {
 	// Validate request body
 	const task = validateTask(req.body)
@@ -66,7 +66,7 @@ router.post('/', [auth, poster], (req, res) => {
 
 	res.status(200).send(`Task ID ${idCounter-1} fue agregado a la base de datos.`)	
 })
-
+// Delete task by id
 router.delete('/:id', [auth, editor], async (req, res) => {
 	const schema = Joi.number().integer().min(0).required();
 	const validateId = schema.validate(req.params.id)
@@ -86,7 +86,7 @@ router.delete('/:id', [auth, editor], async (req, res) => {
 	res.status(200).send(`El task con ID ${validateId.value} se ha eliminado.`)
 
 })
-
+// Edit task by id and field name
 router.put('/:id/:campo', [auth, editor], async (req, res) => {
 	const idSchema = Joi.number().integer().min(0).required();
 	const campoSchema = Joi.string().required().valid(...['title', 'creationDate', 'assignedTo', 'status', 'completedDate'])
