@@ -5,15 +5,15 @@ const Joi = require('joi')
 // Import middlewares
 const auth = require("../middleware/auth");
 const { editor, viewer, poster } = require("../middleware/roles");
-
 // Setup the router for express
 const router = express.Router();
 // Helper
 const findTask = require('../helpers/findTask.js')
+const createBodySchema = require('../helpers/createBodySchema.js')
 // DB
 var database = []
 var idCounter = 0;
-// Create schema - Validate task
+// Create task schema - validate task
 const validateTask = (task) => {
 	const schema = Joi.object({
 		title: Joi.string().min(3).max(24).required(),
@@ -25,7 +25,6 @@ const validateTask = (task) => {
 	return schema.validate(task);
 
 }
-
 // Requests
 router.get('/', [auth, viewer], (req, res) => {
 	if (database.length > 0){
@@ -106,18 +105,28 @@ router.put('/:id/:campo', [auth, editor], async (req, res) => {
 		if (validateCampo.error) res.status(400).send(validateCampo.error.details[0].message)
 		return;
 	}
-	//VALIDATE BODY
+	//VALIDATE BODY KEY
 	if (!(validateCampo.value in req.body) || Object.keys(req.body).length != 1){
 		if (!(validateCampo.value in req.body)) res.status(400).send(`El campo ${validateCampo.value} es necesario`)
 		if (Object.keys(req.body).length != 1) res.status(400).send(`Solo ingresar el campo ${validateCampo.value}`)
 		return;
 	} 
-
+	// VALIDATE BODY VALUE
+	const bodySchema = await createBodySchema(validateCampo.value)
+	const validateBody = bodySchema.validate(Object.values(req.body)[0])
+	if (validateBody.error) {
+		res.status(400).send(validateBody.error.details[0].message)
+		return;
+	}
+	// Check for task in database
 	if (!database[found]){
 		res.status(404).send(`El task con ID ${validateId.value} no existe.`)		
 		return;
 	}
-
+	
+	// Actually update the task
+	database[found] = {...database[found], [validateCampo.value]:validateBody.value}
+	res.status(200).send(`El campo ${validateCampo.value} del task ID ${validateId.value} fue modificado a ${validateBody.value}`)
 
 	
 })
