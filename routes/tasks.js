@@ -7,7 +7,7 @@ const auth = require("../middleware/auth");
 const { editor, viewer, poster } = require("../middleware/roles");
 // Setup the router for express
 const router = express.Router();
-// Helper
+// Helpers
 const findTask = require('../helpers/findTask.js')
 const createBodySchema = require('../helpers/createBodySchema.js')
 // DB
@@ -27,66 +27,61 @@ const validateTask = (task) => {
 }
 // Requests
 router.get('/', [auth, viewer], (req, res) => {
-	if (database.length > 0){
-		res.json(database)
-	} else {
-		res.status(404).send({
-			status: 404,
-			message: 'No hay tasks en la base de datos'
-		})
-	}	
+	if (database.length < 1) res.status(404).send('No existen tasks en la base de datos')
+	res.status(200).send(database)
 })
 
 router.get('/:id', [auth, viewer], async (req, res) => {
 	const schema = Joi.number().integer().min(0).required();
 	const validateId = schema.validate(req.params.id)
 	const found = await findTask(database, validateId.value)
+	// Validate params
 	if (validateId.error) {
 		res.status(400).send(validateId.error.details[0].message)
 		return;
 	}
+	// Check if task exists in database
 	if (!database[found]) {
 		res.status(404).send(`El task con ID ${validateId.value} no existe.`)
 		return;
 	}
-	res.status(200).send(database[found])
-
-	
+	// Send task
+	res.status(200).send(database[found])	
 })
 
 router.post('/', [auth, poster], (req, res) => {
+	// Validate request body
 	const task = validateTask(req.body)
 	if (task.error){
 		res.status(400).send(task.error.details[0].message);
 		return;
 	}
+	// Push to database
 	if (req.body.completedDate){
 		database.push({id: idCounter, ...task.value})
 	} else{
 		database.push({id: idCounter, ...task.value, completedDate: ''})
 	}
 	idCounter ++;
-	res.status(200).send({
-		message: 'task agregado',
-		status:200,
-		success: true,
-		payload: task.value
-	})	
-	console.log('added to db')
+
+	res.status(200).send(`Task ID ${idCounter-1} fue agregado a la base de datos.`)	
 })
 
 router.delete('/:id', [auth, editor], async (req, res) => {
 	const schema = Joi.number().integer().min(0).required();
 	const validateId = schema.validate(req.params.id)
 	const found = await findTask(database, validateId.value)
+	// Validate params
 	if (validateId.error) {
 		res.status(400).send(validateId.error.details[0].message)
 		return;
 	}
+	// Check if task exists in database
 	if (!database[found]) {
 		res.status(404).send(`El task con ID ${validateId.value} no existe.`)		
 		return;
 	}
+	// Delete task
 	database.splice(found, 1)
 	res.status(200).send(`El task con ID ${validateId.value} se ha eliminado.`)
 
@@ -99,19 +94,19 @@ router.put('/:id/:campo', [auth, editor], async (req, res) => {
 	const validateCampo = campoSchema.validate(req.params.campo)
 	const found = await findTask(database, validateId.value)
 	
-	// VALIDATE PARAMS
+	// Validate params
 	if (validateId.error || validateCampo.error) {
 		if (validateId.error) res.status(400).send(validateId.error.details[0].message)
 		if (validateCampo.error) res.status(400).send(validateCampo.error.details[0].message)
 		return;
 	}
-	//VALIDATE BODY KEY
+	// Validate body key
 	if (!(validateCampo.value in req.body) || Object.keys(req.body).length != 1){
 		if (!(validateCampo.value in req.body)) res.status(400).send(`El campo ${validateCampo.value} es necesario`)
 		if (Object.keys(req.body).length != 1) res.status(400).send(`Solo ingresar el campo ${validateCampo.value}`)
 		return;
 	} 
-	// VALIDATE BODY VALUE
+	// Validate body value
 	const bodySchema = await createBodySchema(validateCampo.value)
 	const validateBody = bodySchema.validate(Object.values(req.body)[0])
 	if (validateBody.error) {
@@ -124,11 +119,9 @@ router.put('/:id/:campo', [auth, editor], async (req, res) => {
 		return;
 	}
 	
-	// Actually update the task
+	// Update the task
 	database[found] = {...database[found], [validateCampo.value]:validateBody.value}
 	res.status(200).send(`El campo ${validateCampo.value} del task ID ${validateId.value} fue modificado a ${validateBody.value}`)
-
-	
 })
 
 // Export the router
