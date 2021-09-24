@@ -4,8 +4,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 // Import routes
 const authRouter = require("./routes/auth");
-const postulantesRouter = require("./routes/postulantes");
-const sendEmailRouter = require("./routes/send-email");
+const tasksRouter = require("./routes/tasks");
 // Define port
 const PORT = process.env.PORT || 3030;
 // Instantiate server
@@ -16,8 +15,7 @@ app.use(cors());
 app.use(helmet());
 // Setup all the routes
 app.use("/auth", authRouter);
-app.use("/postulantes", postulantesRouter);
-app.use("/send-email", sendEmailRouter)
+app.use("/tasks", tasksRouter);
 
 app.get("/", (req,res) => {
 	res.send('Sindicarne API')

@@ -7,7 +7,7 @@ const router = express.Router();
 
 // On post
 router.post("/", (req, res) => {
-    // Dummy data
+    // Dummy users
     const users = [{ user: "narz", roles: ["viewer", "editor", "poster"] }, {user:"postulante", roles: ["poster"]}];
 
     // Get to user from the database, if the user is not there return error
