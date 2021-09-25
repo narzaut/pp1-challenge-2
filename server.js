@@ -18,7 +18,7 @@ app.use("/auth", authRouter);
 app.use("/tasks", tasksRouter);
 
 app.get("/", (req,res) => {
-	res.send('Sindicarne API')
+	res.send('Tasks API')
 })
 
 app.listen(PORT, () => {
