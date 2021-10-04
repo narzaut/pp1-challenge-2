@@ -1,6 +1,9 @@
 # pp1-challenge-2
-node express api
-Node Express API
+
+THIS IS A BASIC API REST FOR TASK MANAGMENT
+* NO AUTH
+* JOI VALIDATION
+* NO DB
 
 ---Routes---
 
