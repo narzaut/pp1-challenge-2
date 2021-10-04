@@ -1,6 +1,9 @@
 # pp1-challenge-2
-node express api
-Node Express API
+
+THIS IS A BASIC API REST FOR TASK MANAGMENT
+* JWT AUTH IMPLEMENTATION
+* NO DB
+
 
 ---Routes---
 
