@@ -2,9 +2,6 @@
 const express = require("express");
 const Joi = require('joi')
 	.extend(require('@joi/date'));
-// Import middlewares
-const auth = require("../middleware/auth");
-const { editor, viewer, poster } = require("../middleware/roles");
 // Setup the router for express
 const router = express.Router();
 // Helpers
@@ -26,12 +23,12 @@ const validateTask = (task) => {
 
 }
 // Get all tasks
-router.get('/', [auth, viewer], (req, res) => {
+router.get('/', (req, res) => {
 	if (database.length < 1) res.status(404).send('No existen tasks en la base de datos')
 	res.status(200).send(database)
 })
 // Get task by id
-router.get('/:id', [auth, viewer], async (req, res) => {
+router.get('/:id', async (req, res) => {
 	const schema = Joi.number().integer().min(0).required();
 	const validateId = schema.validate(req.params.id)
 	const found = await findTask(database, validateId.value)
@@ -49,7 +46,7 @@ router.get('/:id', [auth, viewer], async (req, res) => {
 	res.status(200).send(database[found])	
 })
 // Post task to db
-router.post('/', [auth, poster], (req, res) => {
+router.post('/', (req, res) => {
 	// Validate request body
 	const task = validateTask(req.body)
 	if (task.error){
@@ -67,7 +64,7 @@ router.post('/', [auth, poster], (req, res) => {
 	res.status(200).send(`Task ID ${idCounter-1} fue agregado a la base de datos.`)	
 })
 // Delete task by id
-router.delete('/:id', [auth, editor], async (req, res) => {
+router.delete('/:id', async (req, res) => {
 	const schema = Joi.number().integer().min(0).required();
 	const validateId = schema.validate(req.params.id)
 	const found = await findTask(database, validateId.value)
@@ -87,7 +84,7 @@ router.delete('/:id', [auth, editor], async (req, res) => {
 
 })
 // Edit task by id and field name
-router.put('/:id/:campo', [auth, editor], async (req, res) => {
+router.put('/:id/:campo', async (req, res) => {
 	const idSchema = Joi.number().integer().min(0).required();
 	const campoSchema = Joi.string().required().valid(...['title', 'creationDate', 'assignedTo', 'status', 'completedDate'])
 	const validateId = idSchema.validate(req.params.id)
