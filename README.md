@@ -4,7 +4,7 @@ Node Express API
 
 ---Routes---
 
-//localhost:3030/tasks
+    //localhost:3030/tasks
 
 ---Endpoints---
 
@@ -16,7 +16,7 @@ Node Express API
 
 How to run:
 
-    Clone git repository
-    'cd' to cloned repository
-    run 'npm install'
-    run 'node server.js'
+    git clone git@github.com:narzaut/pp1-challenge-2.git
+    cd pp1-challenge-2
+    npm install
+    node server.js
