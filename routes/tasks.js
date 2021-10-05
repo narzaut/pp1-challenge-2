@@ -10,26 +10,32 @@ const router = express.Router();
 // Helpers
 const findTask = require('../helpers/findTask.js')
 const createBodySchema = require('../helpers/createBodySchema.js')
-// DB
-var database = []
-var idCounter = 0;
-// Create task schema - validate task
-const validateTask = (task) => {
-	const schema = Joi.object({
-		title: Joi.string().min(3).max(24).required(),
-		creationDate: Joi.date().format('DD-MM-YYYY').required(),
-		completedDate: Joi.date().format('DD-MM-YYYY'),
-		assignedTo: Joi.string().min(2).max(24).required(),
-		status: Joi.string().valid(...['NEW', 'ACTIVE', 'IN_PROGRESS', 'DONE', 'BLOCKED']).required()
-	});
-	return schema.validate(task);
 
-}
+// Controllers
+const task = require('../controllers/task.js')
+
+
 // Get all tasks
 router.get('/', [auth, viewer], (req, res) => {
-	if (database.length < 1) res.status(404).send('No existen tasks en la base de datos')
-	res.status(200).send(database)
+	res.status(200).send(task.get())
 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Get task by id
 router.get('/:id', [auth, viewer], async (req, res) => {
 	const schema = Joi.number().integer().min(0).required();
